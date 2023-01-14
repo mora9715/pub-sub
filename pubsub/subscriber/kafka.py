@@ -5,21 +5,18 @@ from kafka import KafkaConsumer
 from kafka.consumer.fetcher import ConsumerRecord
 
 from pubsub.event import Event
-
-from .protocol import SubscribeProtocol
+from pubsub.subscriber.protocol import SubscribeProtocol
 
 
 class KafkaSubscriber(SubscribeProtocol):
-    event_header_name = "event_name"
-
-    def __init__(self, topic: str, subscriber_name: str, broker_address: str):
+    def __init__(self, topic: str, subscriber_name: str, broker_address: str) -> None:
         self.topic = topic
         self.subscriptions = {}
         self._consumer = KafkaConsumer(
             self.topic,
             group_id=subscriber_name,
             bootstrap_servers=[broker_address],
-            value_deserializer=self._message_data_deserializer,
+            value_deserializer=lambda m: json.loads(m.decode("utf-8")),
         )
 
     def subscribe(self, event_cls: Type[Event], handler: Callable) -> None:
@@ -37,10 +34,10 @@ class KafkaSubscriber(SubscribeProtocol):
 
     def _process_single_message(self, message: ConsumerRecord) -> None:
         headers = self._transform_headers(message.headers)
-        if self.event_header_name not in headers:
+        if "event_name" not in headers:
             return
 
-        event_name = headers.pop(self.event_header_name)
+        event_name = headers.pop("event_name")
         for event_cls, handler in self.subscriptions.items():
             if event_cls.name() == event_name:
                 # TODO: delegate to process pool executor
@@ -50,7 +47,3 @@ class KafkaSubscriber(SubscribeProtocol):
     @staticmethod
     def _transform_headers(headers: List[Tuple[str, bytes]]) -> Dict[str, str]:
         return {key: value.decode("utf-8") for key, value in headers}
-
-    @staticmethod
-    def _message_data_deserializer(value: bytes) -> Any:
-        return json.loads(value.decode("utf-8"))

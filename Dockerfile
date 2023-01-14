@@ -7,7 +7,7 @@ COPY ./poetry.lock ./poetry.toml ./pyproject.toml ./
 
 RUN poetry install --without dev
 
-COPY ./subscriber1.py ./subscriber2.py ./bootstrap.py ./producer.py ./
+COPY ./subscriber1.py ./subscriber2.py ./bootstrap.py ./publisher.py ./
 COPY ./pubsub ./pubsub
 
 ENTRYPOINT ["python3", "-u"]

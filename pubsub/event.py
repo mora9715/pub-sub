@@ -10,6 +10,7 @@ class Event(ABC):
     def __init__(self, data: Dict[str, Any], metadata: Dict[str, str]):
         self.data = data
         self.metadata = metadata
+        self.metadata["event_name"] = self.name()
 
     @classmethod
     def name(cls) -> str:

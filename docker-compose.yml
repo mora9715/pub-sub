@@ -40,10 +40,10 @@ services:
       - kafka
 
 
-  producer:
+  publisher:
     build:
       context: .
-    command: "producer.py"
+    command: "publisher.py"
     environment:
       BROKER_ADDRESS: "kafka:9092"
     depends_on:

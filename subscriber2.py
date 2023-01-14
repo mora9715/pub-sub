@@ -2,7 +2,7 @@ import os
 
 from bootstrap import bootstrap
 from pubsub.event import UserLoggedIn
-from pubsub.subsciber import KafkaSubscriber
+from pubsub.subscriber import KafkaSubscriber
 
 
 def on_user_logged_in(event: UserLoggedIn) -> None:
