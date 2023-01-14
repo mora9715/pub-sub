@@ -1,0 +1,50 @@
+version: "3"
+services:
+  zookeeper:
+    image: 'bitnami/zookeeper:latest'
+    ports:
+      - '2181:2181'
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+
+  kafka:
+    image: 'bitnami/kafka:latest'
+    ports:
+      - '9092:9092'
+    environment:
+      - KAFKA_BROKER_ID=1
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    depends_on:
+      - zookeeper
+
+  first_subscriber:
+    build:
+      context: .
+    command: "subscriber1.py"
+    environment:
+      BROKER_ADDRESS: "kafka:9092"
+    depends_on:
+      - kafka
+
+
+  second_subscriber:
+    build:
+      context: .
+    command: "subscriber2.py"
+    environment:
+      BROKER_ADDRESS: "kafka:9092"
+    depends_on:
+      - kafka
+
+
+  producer:
+    build:
+      context: .
+    command: "producer.py"
+    environment:
+      BROKER_ADDRESS: "kafka:9092"
+    depends_on:
+      - kafka
