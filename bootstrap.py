@@ -6,6 +6,7 @@ from kafka.errors import NoBrokersAvailable, TopicAlreadyExistsError
 
 
 def bootstrap() -> None:
+    """Wait for a broker to get up and running, creating a default topic after that."""
     while True:
         try:
             print("== Trying to create a topic...")

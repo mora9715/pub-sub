@@ -17,8 +17,12 @@ class Event(ABC):
 
 
 class UserRegistered(Event):
+    """Simple event emitted when a new user is registered."""
+
     pass
 
 
 class UserLoggedIn(Event):
+    """Simple event emitted when a user logs in."""
+
     pass
