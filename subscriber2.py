@@ -6,10 +6,7 @@ from pubsub.subscriber import KafkaSubscriber
 
 
 def on_user_logged_in(event: UserLoggedIn) -> None:
-    print("====")
-    print("Received user login event!")
-    print(f"Data: {event.data}")
-    print(f"Metadata: {event.metadata}")
+    pass
 
 
 def main() -> None:

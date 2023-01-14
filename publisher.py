@@ -1,4 +1,3 @@
-import json
 import os
 from time import sleep
 
@@ -14,7 +13,6 @@ def main() -> None:
     )
 
     while True:
-        print("== Sending events...")
         publisher.publish(
             UserRegistered(data={"user": "doge@doge.com"}, metadata={}), topic=topic
         )

@@ -3,13 +3,14 @@ from time import sleep
 
 from kafka.admin import KafkaAdminClient, NewTopic
 from kafka.errors import NoBrokersAvailable, TopicAlreadyExistsError
+from loguru import logger
 
 
 def bootstrap() -> None:
     """Wait for a broker to get up and running, creating a default topic after that."""
     while True:
         try:
-            print("== Trying to create a topic...")
+            logger.info("Trying to create a topic...")
             admin_client = KafkaAdminClient(
                 bootstrap_servers=os.environ.get("BROKER_ADDRESS", "localhost:9092"),
                 client_id="user",
@@ -25,12 +26,12 @@ def bootstrap() -> None:
                 ],
                 validate_only=False,
             )
-            print("== Created topic successfully!")
+            logger.info("Created topic successfully!")
         except TopicAlreadyExistsError:
-            print("== Topic already exists. Skipping...")
+            logger.info("Topic already exists. Skipping...")
             break
         except NoBrokersAvailable:
-            print("== Broker is not available yet. Retrying...")
+            logger.info("Broker is not available yet. Retrying...")
             sleep(5)
         else:
             break

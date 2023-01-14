@@ -2,6 +2,7 @@ import json
 from typing import Dict, List, Tuple
 
 from kafka import KafkaProducer
+from loguru import logger
 
 from pubsub.event import Event
 from pubsub.publisher.protocol import PublisherProtocol
@@ -15,6 +16,7 @@ class KafkaPublisher(PublisherProtocol):
         )
 
     def publish(self, event: Event, topic: str) -> None:
+        logger.info(f"Publishing an event {event.name()} to topic {topic}", event=event)
         self._producer.send(
             topic, value=event.data, headers=self._transform_headers(event.metadata)
         )
