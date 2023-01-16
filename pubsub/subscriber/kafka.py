@@ -21,13 +21,20 @@ class KafkaSubscriber(SubscribeProtocol):
         )
 
     def subscribe(self, event_cls: Type[Event], handler: Callable) -> None:
-        if event_cls not in self.subscriptions:
-            self.subscriptions[event_cls] = handler
+        if (
+            event_cls not in self.subscriptions
+            or handler not in self.subscriptions[event_cls]
+        ):
+            self.subscriptions.setdefault(event_cls, [])
+            self.subscriptions[event_cls].append(handler)
             logger.info(f"Subscribed to an event {event_cls.name()}")
 
-    def unsubscribe(self, event_cls: Type[Event]) -> None:
-        if event_cls in self.subscriptions:
-            self.subscriptions.pop(event_cls)
+    def unsubscribe(self, event_cls: Type[Event], handler: Callable) -> None:
+        if (
+            event_cls in self.subscriptions in self.subscriptions[event_cls]
+            and handler in self.subscriptions[event_cls]
+        ):
+            self.subscriptions[event_cls].remove(handler)
             logger.info(f"Unsubscribed from an event {event_cls.name()}")
 
     def listen(self) -> None:
@@ -41,14 +48,17 @@ class KafkaSubscriber(SubscribeProtocol):
             return
 
         event_name = headers.pop("event_name")
-        for event_cls, handler in self.subscriptions.items():
-            if event_cls.name() == event_name:
-                # TODO: delegate to process pool executor
-                logger.info(
-                    f"Received an event {event_cls.name()}:\ndata:{message.value}\nmetadata:{headers}"
-                )
+        for event_cls, handlers in self.subscriptions.items():
+            if event_cls.name() != event_name or not handlers:
+                continue
+
+            # TODO: delegate to process pool executor
+            logger.info(
+                f"Received an event {event_cls.name()}:\ndata:{message.value}\nmetadata:{headers}"
+            )
+            for handler in handlers:
                 handler(event_cls(data=message.value, metadata=headers))
-                return
+            return
 
     @staticmethod
     def _transform_headers(headers: List[Tuple[str, bytes]]) -> Dict[str, str]:
